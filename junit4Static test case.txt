@@ -1,0 +1,149 @@
+1st test case
+
+
+@Test
+    public void testCreateBuyer() throws BaasAPIException, StripeException {
+
+        Customer customer = new Customer();
+        customer.setId("cus_MGaoeMi6z1bogt");
+
+        try (MockedStatic<Customer> utilities = Mockito.mockStatic(Customer.class)) {
+            utilities.when((Verification) Customer.create(Mockito.anyMap())).thenReturn(customer);
+            Map<String, Object> stripeCustomerRequest = new HashMap<String, Object>();
+            stripeCustomerRequest.put("customerNo", "abc");
+            StripeBuyerAPIBO request = new StripeBuyerAPIBO();
+            request.setStripeCustomerRequest(stripeCustomerRequest);
+            StripeBuyerAPIResponseBO buyer = (StripeBuyerAPIResponseBO) StripeBuyerAPIServiceImpl.getInstance()
+                    .createBuyer(request);
+            assertEquals(buyer.getStripeCustomer().getId(), "cus_MGaoeMi6z1bogt");
+        }
+    }
+	
+	
+	
+	@Override
+    public BuyerAPIResponseBO createBuyer(BuyerAPIBO buyer) throws BaasAPIException {
+        LOGGER.info(StripeBuyerAPIServiceImpl.class, "createBuyer", "create buyer api call start :: request="+((StripeBuyerAPIBO)buyer).getStripeCustomerRequest());
+        LOG.info("StripeBuyerAPIServiceImpl.createBuyer() create buyer api call start");
+        StripeBuyerAPIResponseBO response = new StripeBuyerAPIResponseBO();
+        try {
+            Stripe.apiKey = ApplicationProperties.getBaasApiProperty(STRIPE_API_KEY_FPI_RATE);
+
+            Customer customer = Customer.create(((StripeBuyerAPIBO)buyer).getStripeCustomerRequest());
+
+            response.setStripeCustomer(customer);
+
+            LOG.info("StripeBuyerAPIServiceImpl.createBuyer() create buyer=" + customer);
+            LOGGER.info(StripeBuyerAPIServiceImpl.class, "createBuyer", "create buyer api call end");
+
+        } catch (Exception e) {
+            LOG.info("Exception in StripeBuyerAPIServiceImpl.createBuyer() : "+ e);
+            throw new BaasAPIException(e.getMessage());
+        }
+        return response;
+    }
+	
+	second Test case
+@Test
+    public void createSupplierTest() throws BaasAPIException, StripeException {
+        String supllierId="cus_MFlvH2htKe4PX5";
+         Stripe.apiKey =
+         "sk_test_51LA5iBGgWAmsiQKAtath3q16Br5LrXLz0KBjtwmK5inKl8pWppofUnNEKtPfMbQGn66z3QSmH870MCXeKsfEKnEe00u4ucHTp7";
+        SupplierAPIResponseBO supplierAPIResponseBO = new SupplierAPIResponseBO();
+        // SupplierRequestBO requestBO= new SupplierRequestBO();
+        //StripeSupplierRequestBO requestBO = new StripeSupplierRequestBO();
+        //SupplierBO supplierBO = new SupplierBO();
+        StripeSupplierAPIResponseBO stripeSupplierAPIResponseBO = new StripeSupplierAPIResponseBO();
+        // stripeSupplierAPIResponseBO.setStripeSupllierAccountLink(stripeSupllierAccountLink);
+        Account account = new Account();
+        account.setCountry("INDIA");
+        account.setEmail("abc@gmail.com");
+        account.setId("cus_123");
+        stripeSupplierAPIResponseBO.setStripeSupplierAccount(account);
+        StripeSupplierRequestBO stripeSupplierRequestBO = new StripeSupplierRequestBO();
+        stripeSupplierRequestBO.setRequestId("56789");
+        Map<String, Object> stripeSupplierRequest = new HashMap<>();
+        
+        stripeSupplierRequest.put("123", "abc");
+        stripeSupplierRequestBO.setStripeSupplierRequest(stripeSupplierRequest);
+        SupplierBO supplierBO=new SupplierBO();
+        supplierBO.setAccType("Saving");
+        supplierBO.setEmail("test@gmail.com");
+        SupplierRequestBO supplierRequestBO=new StripeSupplierRequestBO();
+        supplierRequestBO.setRequestId("12345");
+        List<SupplierBO> supplierList = new ArrayList<>();
+        supplierList.add(supplierBO);
+        supplierRequestBO.setSuppliers(supplierList);
+        //supplierBO.setCountry("India");
+        //supplierBO.setEmail("abc@gmail.com");
+        //requestBO.setRequestId("123");
+          try (MockedStatic<Account> utilities = Mockito.mockStatic(Account.class)) {
+          utilities.when((Verification) Account.create(Mockito.anyMap())).thenReturn(account);
+         
+        //List<SupplierBO> supplierList = new ArrayList<>();
+        //supplierList.add(supplierBO);
+        //requestBO.setSuppliers(supplierList);
+        // supplierAPIResponseBO=
+        //StripeSupplierAPIResponseBO stripeSupplierAPIResponseBO = (StripeSupplierAPIResponseBO) stripeSupplierAPIServiceImpl
+            //    .getInstance().createSupplier(requestBO);
+        SupplierAPIResponseBO supplierAPIResponseBOData = StripeSupplierAPIServiceImpl.getInstance()
+                .createSupplier(supplierRequestBO);
+        // assertNotNull(stripeSupplierAPIResponseBO);
+        SupplierAPIResponseBO supplierAPIResponse=(SupplierAPIResponseBO)service.createSupplier(supplierRequestBO);
+        
+        assertNotNull(supplierAPIResponse);
+    }
+    }
+	
+	
+	@Override
+    public SupplierAPIResponseBO createSupplier(SupplierRequestBO supplier) throws BaasAPIException {
+        LOGGER.info(StripeSupplierAPIServiceImpl.class, "createSupplier", "create supplier api call start :: request="+((StripeSupplierRequestBO)supplier).getStripeSupplierRequest());
+        LOG.info("StripeSupplierAPIServiceImpl.createSupplier() create supplier api call start");
+        StripeSupplierAPIResponseBO response = new StripeSupplierAPIResponseBO();
+        try {
+            Stripe.apiKey = ApplicationProperties.getBaasApiProperty(STRIPE_API_KEY_FPI_RATE);
+
+            Account stripeSupplierAccount = Account.create(((StripeSupplierRequestBO)supplier).getStripeSupplierRequest());
+
+            response.setStripeSupplierAccount(stripeSupplierAccount);
+            LOG.info("StripeSupplierAPIServiceImpl.createSupplier() create supplier=" + stripeSupplierAccount);
+            LOGGER.info(StripeSupplierAPIServiceImpl.class, "createSupplier", "create supplier api call end");
+
+        } catch (Exception e) {
+            throw new BaasAPIException(e.getMessage());
+        }
+        return response;
+    }
+	
+	
+	@Override
+    public SupplierAPIResponseBO createSupplier(SupplierRequestBO requestBO, BaasProvider provider)
+            throws BaasAPIException {
+        LOG.info("BaasAPIServiceImpl.createSupplier() create suppiler api call start");
+
+        // validate buyer request object
+        if (BaasProvider.VISA.toString().equalsIgnoreCase(provider.toString())) {
+            try {
+                ValidatorUtil.validate(requestBO);
+            } catch (APIValidationException e) {
+                LOGGER.error(BaasAPIServiceImpl.class, "validation",
+                        "Exception in createSupplier() method of BaasAPIServiceImpl = " + e);
+                LOG.error("Exception in BaasAPIServiceImpl.createSupplier() method = " + e);
+                throw new BaasAPIException(e.getMessage());
+            }
+        }
+        switch (provider) {
+        case VISA:
+            SupplierAPIResponseBO response = VisaSupplierAPIServiceImpl.getInstance().createSupplier(requestBO);
+            LOG.info("BaasAPIServiceImpl.createSupplier() create suppiler api call end");
+            return response;
+        case STRIPE:
+            StripeSupplierAPIResponseBO stripeResponse = (StripeSupplierAPIResponseBO) StripeSupplierAPIServiceImpl.getInstance().createSupplier(requestBO);
+            LOG.info("BaasAPIServiceImpl.createSupplier() create suppiler api call end");
+            return stripeResponse;
+        default:
+            throw new BaasAPIException("API Implementation not found");
+        }
+    }// method createSupplier
+	
